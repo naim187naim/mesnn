@@ -57,11 +57,15 @@ const pages = {
     }
 };
 
+// --- GESTION DES CŒURS ---
 function initHearts() {
-    const container = document.createElement('div');
-    container.className = 'bg-hearts';
-    container.id = 'bg-hearts';
-    document.body.prepend(container);
+    let container = document.getElementById('bg-hearts');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'bg-hearts';
+        container.id = 'bg-hearts';
+        document.body.prepend(container);
+    }
 }
 
 function updateHearts(symbol) {
@@ -84,10 +88,10 @@ function createHeart(symbol) {
     h.style.left = Math.random() * 100 + 'vw';
     h.style.animationDuration = (Math.random() * 3 + 4) + 's';
     container.appendChild(h);
-    
     setTimeout(() => h.remove(), 6000);
 }
 
+// --- NAVIGATION ---
 function changePage(pageKey) {
     const page = pages[pageKey];
     if (!page) return;
@@ -97,13 +101,11 @@ function changePage(pageKey) {
     
     const app = document.getElementById('app');
     
-    // Construction du HTML de la carte
     let htmlContent = `
         <div class="glass-card">
             <h1>${page.title}</h1>
             <p>${page.text}</p>`;
     
-    // Si on est sur la page de message, on ajoute le champ de texte
     if (page.isMessagePage) {
         htmlContent += `
             <textarea id="zoneMessage" placeholder="Ton message ici..." 
@@ -112,7 +114,6 @@ function changePage(pageKey) {
             </textarea>`;
     }
 
-    // Ajout des boutons
     htmlContent += `
             <div class="btn-container">
                 ${page.buttons.map(btn => `<button onclick="${btn.action}">${btn.text}</button>`).join('')}
@@ -123,19 +124,22 @@ function changePage(pageKey) {
     app.innerHTML = htmlContent;
 }
 
+// --- ENREGISTREMENT ET ENVOI ---
 function saveAndExit(choice) {
-    // On enregistre le choix en BDD via AJAX
+    const formData = new FormData();
+    formData.append('choix', choice);
+
     fetch('save.php', {
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `choix=${encodeURIComponent(choice)}`
+        body: formData
     });
-    // On change de page après l'enregistrement
     changePage(choice);
 }
 
 function envoyerMessage() {
-    const message = document.getElementById('zoneMessage').value;
+    const zone = document.getElementById('zoneMessage');
+    const message = zone.value;
+    
     if (!message.trim()) {
         alert("Le message est vide !");
         return;
@@ -147,15 +151,18 @@ function envoyerMessage() {
     fetch('save.php', {
         method: 'POST',
         body: formData
-    }).then(() => {
+    })
+    .then(() => {
         alert("Message envoyé ! ❤️");
-        changePage('accueil'); // Retour au début après l'envoi
-    }).catch(err => {
-        alert("Erreur lors de l'envoi.");
+        changePage('accueil');
+    })
+    .catch(err => {
+        alert("Erreur réseau...");
+        console.error(err);
     });
 }
 
-// Lancement au chargement de la page
+// Lancement automatique
 window.onload = () => {
     initHearts();
     changePage('accueil');

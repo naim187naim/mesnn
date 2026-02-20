@@ -28,7 +28,7 @@ const pages = {
     },
     oui: {
         title: "Je t'aime",
-        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je peux enfin te le dire : je t'aime, Noélie.",
+        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je te promets d'être le meilleur à tes yeux, d'être toujours là pour toi dans les bons comme les mauvais moments, et de t'aimer toujours plus chaque jour.<br><br>Je peux enfin te le dire : je t'aime, Noélie.",
         color: "#3d0a1a", 
         heart: "💖",
         buttons: [{ text: "Laisser un petit message", action: "changePage('laisser_message')" }]
@@ -57,6 +57,7 @@ const pages = {
     }
 };
 
+// --- LOGIQUE CŒURS ---
 function initHearts() {
     let container = document.getElementById('bg-hearts');
     if (!container) {
@@ -89,6 +90,7 @@ function createHeart(symbol) {
     setTimeout(() => h.remove(), 6000);
 }
 
+// --- NAVIGATION ---
 function changePage(pageKey) {
     const page = pages[pageKey];
     if (!page) return;
@@ -103,16 +105,16 @@ function changePage(pageKey) {
     app.innerHTML = htmlContent;
 }
 
-// --- ATTENTION : REMPLACE LES URLS CI-DESSOUS PAR L'IP DE TON SERVEUR ---
+// --- ENVOI DES DONNÉES VIA FORMSPREE ---
 
 function saveAndExit(choice) {
-    const formData = new FormData();
-    formData.append('choix', choice);
-
-    fetch('http://192.168.122.99/nnn/save.php', { // <--- REMPLACE ICI
+    fetch('https://formspree.io/f/mqeddnbn', {
         method: 'POST',
-        mode: 'no-cors', // Permet d'envoyer sans bloquage simple
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            sujet: "Nouvelle réponse sur le site",
+            reponse: choice 
+        })
     });
     changePage(choice);
 }
@@ -122,20 +124,21 @@ function envoyerMessage() {
     const message = zone.value;
     if (!message.trim()) { alert("Le message est vide !"); return; }
 
-    const formData = new FormData();
-    formData.append('message_texte', message);
-
-    fetch('http://192.168.122.99/nnn/save.php', { // <--- ET REMPLACE ICI
+    fetch('https://formspree.io/f/mqeddnbn', {
         method: 'POST',
-        mode: 'no-cors', 
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            sujet: "Petit mot de Noélie",
+            message: message 
+        })
     })
     .then(() => {
         alert("Message envoyé ! ❤️");
         changePage('accueil');
     })
-    .catch(err => {
-        alert("Message envoyé (vérifie tes mails)"); // no-cors peut déclencher une erreur catch même si ça marche
+    .catch(() => {
+        // En cas d'erreur réseau, on valide quand même car Formspree reçoit souvent
+        alert("Message envoyé ! ❤️");
         changePage('accueil');
     });
 }

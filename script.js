@@ -28,7 +28,7 @@ const pages = {
     },
     oui: {
         title: "Je t'aime",
-        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je peux enfin te le dire : je t'aime, Noélie.",
+        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je te promets d'être le meilleur à tes yeux, d'être toujours là pour toi dans les bons comme les mauvais moments, et de t'aimer toujours plus chaque jour.<br><br>Je peux enfin te le dire : je t'aime, Noélie.",
         color: "#3d0a1a", 
         heart: "💖",
         buttons: [{ text: "Laisser un petit message", action: "changePage('laisser_message')" }]
@@ -84,45 +84,62 @@ function createHeart(symbol) {
     h.style.left = Math.random() * 100 + 'vw';
     h.style.animationDuration = (Math.random() * 3 + 4) + 's';
     container.appendChild(h);
+    
     setTimeout(() => h.remove(), 6000);
 }
 
 function changePage(pageKey) {
     const page = pages[pageKey];
+    if (!page) return;
+
     document.body.style.background = page.color;
     updateHearts(page.heart);
     
     const app = document.getElementById('app');
-    let html = `
+    
+    // Construction du HTML de la carte
+    let htmlContent = `
         <div class="glass-card">
             <h1>${page.title}</h1>
             <p>${page.text}</p>`;
     
+    // Si on est sur la page de message, on ajoute le champ de texte
     if (page.isMessagePage) {
-        html += `<textarea id="zoneMessage" placeholder="Ton message ici..." style="width:100%; height:100px; border-radius:15px; padding:10px; margin-bottom:20px; border:none; background: rgba(255,255,255,0.2); color:white; font-family:inherit; outline:none;"></textarea>`;
+        htmlContent += `
+            <textarea id="zoneMessage" placeholder="Ton message ici..." 
+                style="width:100%; height:100px; border-radius:15px; padding:10px; margin-bottom:20px; 
+                border:none; background: rgba(255,255,255,0.2); color:white; font-family:inherit; outline:none;">
+            </textarea>`;
     }
 
-    html += `
+    // Ajout des boutons
+    htmlContent += `
             <div class="btn-container">
                 ${page.buttons.map(btn => `<button onclick="${btn.action}">${btn.text}</button>`).join('')}
             </div>
         </div>
     `;
-    app.innerHTML = html;
+    
+    app.innerHTML = htmlContent;
 }
 
 function saveAndExit(choice) {
+    // On enregistre le choix en BDD via AJAX
     fetch('save.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `choix=${encodeURIComponent(choice)}`
     });
+    // On change de page après l'enregistrement
     changePage(choice);
 }
 
 function envoyerMessage() {
     const message = document.getElementById('zoneMessage').value;
-    if (!message.trim()) return alert("Le message est vide !");
+    if (!message.trim()) {
+        alert("Le message est vide !");
+        return;
+    }
 
     const formData = new FormData();
     formData.append('message_texte', message);
@@ -132,9 +149,14 @@ function envoyerMessage() {
         body: formData
     }).then(() => {
         alert("Message envoyé ! ❤️");
-        changePage('accueil');
+        changePage('accueil'); // Retour au début après l'envoi
+    }).catch(err => {
+        alert("Erreur lors de l'envoi.");
     });
 }
 
-initHearts();
-changePage('accueil');
+// Lancement au chargement de la page
+window.onload = () => {
+    initHearts();
+    changePage('accueil');
+};

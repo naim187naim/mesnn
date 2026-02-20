@@ -58,7 +58,6 @@ function initHearts() {
 
 function updateHearts(symbol) {
     const container = document.getElementById('bg-hearts');
-    if (!container) return;
     container.innerHTML = ''; 
     if (!symbol) return; 
 
@@ -76,14 +75,11 @@ function createHeart(symbol) {
     h.style.left = Math.random() * 100 + 'vw';
     h.style.animationDuration = (Math.random() * 3 + 4) + 's';
     container.appendChild(h);
-    
     setTimeout(() => h.remove(), 6000);
 }
 
 function changePage(pageKey) {
     const page = pages[pageKey];
-    if (!page) return;
-
     document.body.style.background = page.color;
     updateHearts(page.heart);
     
@@ -108,8 +104,5 @@ function saveAndExit(choice) {
     changePage(choice);
 }
 
-// Lancement au chargement de la page
-window.addEventListener('DOMContentLoaded', () => {
-    initHearts();
-    changePage('accueil');
-});
+initHearts();
+changePage('accueil');

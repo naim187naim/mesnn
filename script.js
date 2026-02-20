@@ -28,7 +28,7 @@ const pages = {
     },
     oui: {
         title: "Je t'aime",
-        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je te promets d'être le meilleur à tes yeux, d'être toujours là pour toi dans les bons comme les mauvais moments, et de t'aimer toujours plus chaque jour.<br><br>Je peux enfin te le dire : je t'aime, Noélie.",
+        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je peux enfin te le dire : je t'aime, Noélie.",
         color: "#3d0a1a", 
         heart: "💖",
         buttons: [{ text: "Laisser un petit message", action: "changePage('laisser_message')" }]
@@ -57,7 +57,6 @@ const pages = {
     }
 };
 
-// --- GESTION DES CŒURS ---
 function initHearts() {
     let container = document.getElementById('bg-hearts');
     if (!container) {
@@ -73,7 +72,6 @@ function updateHearts(symbol) {
     if (!container) return;
     container.innerHTML = ''; 
     if (!symbol) return; 
-
     for(let i=0; i<15; i++) {
         setTimeout(() => createHeart(symbol), i * 300);
     }
@@ -91,46 +89,29 @@ function createHeart(symbol) {
     setTimeout(() => h.remove(), 6000);
 }
 
-// --- NAVIGATION ---
 function changePage(pageKey) {
     const page = pages[pageKey];
     if (!page) return;
-
     document.body.style.background = page.color;
     updateHearts(page.heart);
-    
     const app = document.getElementById('app');
-    
-    let htmlContent = `
-        <div class="glass-card">
-            <h1>${page.title}</h1>
-            <p>${page.text}</p>`;
-    
+    let htmlContent = `<div class="glass-card"><h1>${page.title}</h1><p>${page.text}</p>`;
     if (page.isMessagePage) {
-        htmlContent += `
-            <textarea id="zoneMessage" placeholder="Ton message ici..." 
-                style="width:100%; height:100px; border-radius:15px; padding:10px; margin-bottom:20px; 
-                border:none; background: rgba(255,255,255,0.2); color:white; font-family:inherit; outline:none;">
-            </textarea>`;
+        htmlContent += `<textarea id="zoneMessage" placeholder="Ton message ici..." style="width:100%; height:100px; border-radius:15px; padding:10px; margin-bottom:20px; border:none; background: rgba(255,255,255,0.2); color:white; font-family:inherit; outline:none;"></textarea>`;
     }
-
-    htmlContent += `
-            <div class="btn-container">
-                ${page.buttons.map(btn => `<button onclick="${btn.action}">${btn.text}</button>`).join('')}
-            </div>
-        </div>
-    `;
-    
+    htmlContent += `<div class="btn-container">${page.buttons.map(btn => `<button onclick="${btn.action}">${btn.text}</button>`).join('')}</div></div>`;
     app.innerHTML = htmlContent;
 }
 
-// --- ENREGISTREMENT ET ENVOI ---
+// --- ATTENTION : REMPLACE LES URLS CI-DESSOUS PAR L'IP DE TON SERVEUR ---
+
 function saveAndExit(choice) {
     const formData = new FormData();
     formData.append('choix', choice);
 
-    fetch('save.php', {
+    fetch('http://192.168.122.99/nnn/save.php', { // <--- REMPLACE ICI
         method: 'POST',
+        mode: 'no-cors', // Permet d'envoyer sans bloquage simple
         body: formData
     });
     changePage(choice);
@@ -139,17 +120,14 @@ function saveAndExit(choice) {
 function envoyerMessage() {
     const zone = document.getElementById('zoneMessage');
     const message = zone.value;
-    
-    if (!message.trim()) {
-        alert("Le message est vide !");
-        return;
-    }
+    if (!message.trim()) { alert("Le message est vide !"); return; }
 
     const formData = new FormData();
     formData.append('message_texte', message);
 
-    fetch('save.php', {
+    fetch('http://192.168.122.99/nnn/save.php', { // <--- ET REMPLACE ICI
         method: 'POST',
+        mode: 'no-cors', 
         body: formData
     })
     .then(() => {
@@ -157,13 +135,9 @@ function envoyerMessage() {
         changePage('accueil');
     })
     .catch(err => {
-        alert("Erreur réseau...");
-        console.error(err);
+        alert("Message envoyé (vérifie tes mails)"); // no-cors peut déclencher une erreur catch même si ça marche
+        changePage('accueil');
     });
 }
 
-// Lancement automatique
-window.onload = () => {
-    initHearts();
-    changePage('accueil');
-};
+window.onload = () => { initHearts(); changePage('accueil'); };

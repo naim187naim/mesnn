@@ -6,18 +6,23 @@ const pages = {
         isLoginPage: true,
         buttons: [{ text: "Entrer", action: "verifierIdentite()" }]
     },
+    intrude: {
+        title: "Accès Refusé",
+        text: "Désolé, mais vous n'avez rien à faire ici. Ce site est privé. <br><br>Veuillez fermer cet onglet et continuer votre chemin.",
+        color: "#1a0000",
+        heart: "🚫",
+        buttons: [{ text: "Réessayer", action: "location.reload()" }]
+    },
     naim: {
-        text: "01000011 01110010 01101111 01101001 01110010 01100101 00100000 01100101 01101110 00100000 01110011 01100101 01110011 00100000 01110010 01100101 01110110 01100101 01110011 00100000 01100011 00100111 01100101 01110011 01110100 00100000 01100010 01101001 01100101 01101110 00100000 01101100 01100101 01110011 00100000 01110010 01100101 01100001 01101100 01101001 01110011 01100101 0111001er 00100000 01100011 00100111 01100101 01110011 01110100 00100000 01101101 01101001 01100101 01110101 0111100x",
+        title: ":}",
+        text: "01000011 01110010 01101111 01101001 01110010 01100101 00100000 01100101 01101110 00100000 01110011 01100101 01110011 00100000 01110010 01100101 01110110 01100101 01110011 00100000 01100011 00100111 01100101 01110011 01110100 00100000 01100010 01101001 01100101 01101110 00101100 00100000 01101100 01100101 01110011 00100000 01110010 01100101 01100001 01101100 01101001 01110011 01100101 01110011 00100000 01100011 00100111 01100101 01110011 01110100 00100000 01101101 01101001 01100101 01110101 01111000",
         color: "#1a0033",
-        heart: "💻",
-        isNaimPage: true,
         buttons: [{ text: "Accéder au site", action: "changePage('accueil')" }]
     },
     accueil: {
         title: "Pour Noélie",
         text: "Je sais que ça fait bien longtemps que je te parle du site web, mais je l'ai enfin fini en espérant qu'il te plaît.",
         color: "#0f0f0f", 
-        heart: "✨",
         buttons: [{ text: "Next", action: "changePage('demande')" }]
     },
     demande: {
@@ -40,13 +45,6 @@ const pages = {
             { text: "Je préfère que tu restes mon meilleur ami", action: "saveAndExit('ami')" }
         ]
     },
-    easteregg: {
-        title: "Système Corrompu...",
-        text: "Félicitations, voyageur... Si tu as découvert ce message, sache que tu n'es pas au bout de tes surprises. <br><br>Ce site cache bien plus que de simples lignes de code... Prépare-toi.",
-        color: "#003300",
-        heart: "👁️",
-        buttons: [{ text: "Retour", action: "location.reload()" }]
-    },
     oui: {
         title: "Je t'aime",
         text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je te promets d'être le meilleur à tes yeux, d'être toujours là pour toi dans les bons comme les mauvais moments, et de t'aimer toujours plus chaque jour.<br><br>Je peux enfin te le dire : je t'aime, Noélie.",
@@ -63,7 +61,7 @@ const pages = {
     },
     ami: {
         title: "Ma meilleure pote",
-        text: "Bon, si tel est ton choix, je dois le respecter.<br><br>Mais je veux que tu saches une chose : même en tant que meilleur ami, je serai toujours là pour toi et je ne te laisserai jamais tomber, peu importe ce qu'il se passe pour toi.<br><br><b>Ma meilleure pote.</b>",
+        text: "Bon, si tel est ton choix, je dois le respecter.<br><br>Mais je veux que tu saches une chose : même en tant que meilleur ami, je serai toujours là pour toi et je ne te laisserai jamais tomber, peu importe ce qu'il se passe pour toi.<br><br>Ma meilleure pote.",
         color: "#0a1a2b", 
         heart: "💙",
         buttons: [{ text: "Laisser un petit message", action: "changePage('laisser_message')" }]
@@ -75,48 +73,23 @@ const pages = {
         heart: "✉️",
         isMessagePage: true,
         buttons: [{ text: "Envoyer le message", action: "envoyerMessage()" }]
-    },
-    fantome: {
-        title: "",
-        text: "Maintenant... appelle-moi.",
-        color: "#000000",
-        heart: "", 
-        buttons: [] 
-    },
-    intrude: {
-        title: "Accès Refusé",
-        text: "Désolé, mais vous n'avez rien à faire ici. Ce site est privé. <br><br>Veuillez fermer cet onglet et continuer votre chemin.",
-        color: "#1a0000",
-        heart: "🚫",
-        buttons: [{ text: "Réessayer", action: "location.reload()" }]
     }
 };
 
-const FORMSPREE_URL = 'https://formspree.io/f/mqeddnbn';
+const FORMSPREE_URL = 'save.php';
 let typingTimer;
 let nbClicsNon = 0;
 const phrasesNon = ["Tu es sûre ?", "Vraiment ?", "Réfléchis encore...", "Bon bah..."];
-let notifLue = false;
-let tempsDebutDemande = 0;
-let tempsFinalDecision = 0;
 
-// --- GESTION DU KONAMI CODE ---
-const sequenceCorrecte = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight"];
-let inputUtilisateur = [];
-
-document.addEventListener('keydown', (e) => {
-    inputUtilisateur.push(e.key);
-    inputUtilisateur = inputUtilisateur.slice(-sequenceCorrecte.length);
-    if (JSON.stringify(inputUtilisateur) === JSON.stringify(sequenceCorrecte)) {
-        document.body.style.filter = "invert(1)";
-        setTimeout(() => {
-            document.body.style.filter = "none";
-            changePage('easteregg');
-        }, 500);
+function gererClicNon(btnElement) {
+    if (nbClicsNon < phrasesNon.length) {
+        btnElement.innerText = phrasesNon[nbClicsNon];
+        nbClicsNon++;
+    } else {
+        nbClicsNon = 0; 
+        changePage('choixNon');
     }
-});
-
-// --- FONCTIONS LOGIQUE ---
+}
 
 function verifierIdentite() {
     const input = document.getElementById('nomLogin');
@@ -132,16 +105,6 @@ function verifierIdentite() {
     if (nomSaisi === "bruja") { changePage('accueil'); } 
     else if (nomSaisi === "naim" || nomSaisi === "naïm") { changePage('naim'); } 
     else { changePage('intrude'); }
-}
-
-function gererClicNon(btnElement) {
-    if (nbClicsNon < phrasesNon.length) {
-        btnElement.innerText = phrasesNon[nbClicsNon];
-        nbClicsNon++;
-    } else {
-        nbClicsNon = 0; 
-        changePage('choixNon');
-    }
 }
 
 function typeWriter(text, i, fnCallback) {
@@ -169,35 +132,10 @@ function changePage(pageKey) {
     clearTimeout(typingTimer);
     document.body.style.background = page.color;
     updateHearts(page.heart);
-
-    if (pageKey === 'demande') {
-        tempsDebutDemande = Date.now();
-        if (!notifLue) {
-            fetch(FORMSPREE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ alerte: "⚠️ Noélie est en train de lire la demande !" })
-            });
-            notifLue = true;
-        }
-    }
     
     const app = document.getElementById('app');
-    let htmlContent = `<div class="glass-card">`;
-    
-    if (pageKey === 'oui') {
-        htmlContent += `<h1 onclick="revelerCompteur()" style="cursor:help">${page.title}</h1>`;
-    } else if (page.title) {
-        htmlContent += `<h1>${page.title}</h1>`;
-    }
-    
-    const typewriterClass = page.isNaimPage ? 'class="binary-glitch"' : '';
-    htmlContent += `<p id="typewriter" ${typewriterClass}></p>`;
-    
-    if (pageKey === 'oui') {
-        htmlContent += `<div id="secret-counter" style="display:none; font-family:monospace; color:#ffb3d1; margin-bottom:20px; font-size:0.9rem; padding:10px; border:1px dashed #ffb3d1; border-radius:10px; animation: fadeIn 1s;"></div>`;
-    }
-
+    let htmlContent = `<div class="glass-card"><h1>${page.title}</h1>`;
+    htmlContent += `<p id="typewriter"></p>`;
     htmlContent += `<div id="extra-content" style="display:none; opacity:0; transition: opacity 0.5s ease;">`;
     
     if (page.isLoginPage) {
@@ -218,66 +156,50 @@ function changePage(pageKey) {
 
     if (page.isLoginPage) {
         document.getElementById('typewriter').innerHTML = page.text;
-        showExtra();
-    } else {
-        typeWriter(page.text, 0, showExtra);
-    }
-}
-
-function revelerCompteur() {
-    const zone = document.getElementById('secret-counter');
-    if (!zone) return;
-    const secondes = Math.floor(tempsFinalDecision / 1000);
-    zone.innerHTML = `Analyse du système...<br>Réflexion : ${secondes} sec.<br>Moi, ça fait 3 ans.<br>Sincérité : 100% ❤️`;
-    zone.style.display = 'block';
-}
-
-function showExtra() {
-    const extra = document.getElementById('extra-content');
-    if(extra) {
+        const extra = document.getElementById('extra-content');
         extra.style.display = 'block';
         setTimeout(() => extra.style.opacity = '1', 10);
+    } else {
+        typeWriter(page.text, 0, () => {
+            const extra = document.getElementById('extra-content');
+            extra.style.display = 'block';
+            setTimeout(() => extra.style.opacity = '1', 10);
+        });
     }
 }
 
 function saveAndExit(choice) {
-    if (tempsDebutDemande > 0) tempsFinalDecision = Date.now() - tempsDebutDemande;
-
-    if (choice === 'oui' && window.navigator.vibrate) {
-        window.navigator.vibrate([200, 100, 200]);
-    }
-
     fetch(FORMSPREE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sujet: "Choix de Noélie", reponse: choice, temps_reflexion: tempsFinalDecision })
+        body: JSON.stringify({ sujet: "Choix de Noélie", reponse: choice })
     });
     changePage(choice);
 }
 
 function envoyerMessage() {
     const zone = document.getElementById('zoneMessage');
-    if(!zone || !zone.value.trim()) return;
+    if(!zone) return;
+    const message = zone.value;
+    if (!message.trim()) { alert("Le message est vide !"); return; }
     
     fetch(FORMSPREE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sujet: "Message de Noélie", message: zone.value })
+        body: JSON.stringify({ sujet: "Message de Noélie", message: message })
     }).then(() => {
-        const app = document.getElementById('app');
-        app.style.transition = "opacity 2s ease";
-        app.style.opacity = "0";
-        setTimeout(() => {
-            changePage('fantome');
-            app.style.opacity = "1";
-        }, 2000);
+        alert("Message envoyé ! ❤️");
+        changePage('accueil');
     });
 }
 
 function initHearts() {
-    let container = document.getElementById('bg-hearts') || document.createElement('div');
-    container.className = 'bg-hearts'; container.id = 'bg-hearts';
-    if (!document.getElementById('bg-hearts')) document.body.prepend(container);
+    let container = document.getElementById('bg-hearts');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'bg-hearts'; container.id = 'bg-hearts';
+        document.body.prepend(container);
+    }
 }
 
 function updateHearts(symbol) {
@@ -290,6 +212,7 @@ function updateHearts(symbol) {
 
 function createHeart(symbol) {
     const container = document.getElementById('bg-hearts');
+    if(!container) return;
     const h = document.createElement('div');
     h.className = 'floating-heart';
     h.innerHTML = symbol;

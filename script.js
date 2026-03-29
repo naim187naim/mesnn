@@ -17,7 +17,7 @@ const pages = {
         title: ":}",
         text: "01000011 01110010 01101111 01101001 01110010 01100101 00100000 01100101 01101110 00100000 01110011 01100101 01110011 00100000 01110010 01100101 01110110 01100101 01110011 00100000 01100011 00100111 01100101 01110011 01110100 00100000 01100010 01101001 01100101 01101110 00101100 00100000 01101100 01100101 01110011 00100000 01110010 01100101 01100001 01101100 01101001 01110011 01100101 01110011 00100000 01100011 00100111 01100101 01110011 01110100 00100000 01101101 01101001 01100101 01110101 01111000",
         color: "#1a0033",
-        buttons: [{ text: "Retour", action: "location.reload()" }] // Modifié ici pour retourner au login
+        buttons: [{ text: "Retour", action: "location.reload()" }]
     },
     accueil: {
         title: "Pour Noélie",
@@ -47,7 +47,7 @@ const pages = {
     },
     oui: {
         title: "Je t'aime",
-        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je te promets d'être le meilleur à tes yeux, d'être toujours là pour toi dans les bons comme les mauvais moments, et de t'aimer toujours plus chaque jour.<br><br>Je peux enfin te le dire : je t'aime, Noélie.",
+        text: "Noélie, je t'aime, je t'aime, je t'aime. <br><br>Ça fait bientôt 3 ans que j'attends cette réponse. Tu ne pouvais pas me rendre plus heureux que maintenant. <br><br>Je peux enfin te le dire : je t'aime, Noélie.",
         color: "#3d0a1a", 
         heart: "💖",
         buttons: [{ text: "Laisser un petit message", action: "changePage('laisser_message')" }]
@@ -76,7 +76,9 @@ const pages = {
     }
 };
 
-const FORMSPREE_URL = 'save.php';
+// CONFIGURATION WEB3FORMS
+const WEB3_ACCESS_KEY = "dffce9ea-55d0-48bb-aba3-4e6ecfdaa557";
+
 let typingTimer;
 let nbClicsNon = 0;
 const phrasesNon = ["Tu es sûre ?", "Vraiment ?", "Réfléchis encore...", "Bon bah..."];
@@ -96,10 +98,15 @@ function verifierIdentite() {
     if(!input) return;
     const nomSaisi = input.value.trim().toLowerCase();
     
-    fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sujet: "Tentative de connexion", nom_entre: nomSaisi })
+    // Notification de connexion
+    fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+            access_key: WEB3_ACCESS_KEY,
+            subject: "Connexion au Site",
+            nom_entre: nomSaisi
+        })
     });
 
     if (nomSaisi === "bruja") { changePage('accueil'); } 
@@ -169,10 +176,14 @@ function changePage(pageKey) {
 }
 
 function saveAndExit(choice) {
-    fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sujet: "Choix de Noélie", reponse: choice })
+    fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+            access_key: WEB3_ACCESS_KEY,
+            subject: "Choix de Noélie",
+            reponse: choice
+        })
     });
     changePage(choice);
 }
@@ -183,10 +194,14 @@ function envoyerMessage() {
     const message = zone.value;
     if (!message.trim()) { alert("Le message est vide !"); return; }
     
-    fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sujet: "Message de Noélie", message: message })
+    fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+            access_key: WEB3_ACCESS_KEY,
+            subject: "Message de Noélie",
+            message: message
+        })
     }).then(() => {
         alert("Message envoyé ! ❤️");
         changePage('accueil');
